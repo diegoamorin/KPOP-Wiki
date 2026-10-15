@@ -1,0 +1,821 @@
+{
+  "IdentityFieldsDto": {
+    "type": "object",
+    "properties": {
+      "displayName": { "type": "string", "description": "displayName" },
+      "type": {
+        "type": "string",
+        "description": "person | organization. Immutable after publication. Legacy agent requires manual classification before migration.",
+        "enum": ["person", "organization"]
+      },
+      "imgProfile": {
+        "type": "string",
+        "description": "imgProfile",
+        "nullable": true,
+        "format": "uri"
+      },
+      "bio": { "type": "string", "description": "bio", "nullable": true }
+    },
+    "required": ["displayName", "type"]
+  },
+  "Identity_PersonDto": {
+    "type": "object",
+    "properties": {
+      "givenName": {
+        "type": "string",
+        "description": "givenName",
+        "nullable": true
+      },
+      "familyName": {
+        "type": "string",
+        "description": "familyName",
+        "nullable": true
+      },
+      "birthDate": {
+        "type": "string",
+        "description": "birthDate",
+        "nullable": true,
+        "format": "date"
+      },
+      "deathDate": {
+        "type": "string",
+        "description": "deathDate",
+        "nullable": true,
+        "format": "date"
+      },
+      "heightCm": {
+        "type": "integer",
+        "description": "heightCm",
+        "nullable": true
+      },
+      "gender": {
+        "type": "string",
+        "description": "male | female | other",
+        "enum": ["male", "female", "other"],
+        "nullable": true
+      }
+    }
+  },
+  "Identity_OrganizationDto": {
+    "type": "object",
+    "properties": {
+      "legalName": {
+        "type": "string",
+        "description": "legalName",
+        "nullable": true
+      },
+      "foundingDate": {
+        "type": "string",
+        "description": "foundingDate",
+        "nullable": true,
+        "format": "date"
+      },
+      "dissolutionDate": {
+        "type": "string",
+        "description": "dissolutionDate",
+        "nullable": true,
+        "format": "date"
+      },
+      "originCountryId": {
+        "type": "string",
+        "description": "FK -> countries.id. ON DELETE RESTRICT.",
+        "nullable": true
+      }
+    }
+  },
+  "Identity_ArtistDto": { "type": "object", "properties": {} },
+  "Identity_AliasesDto": {
+    "type": "object",
+    "properties": {
+      "alias": { "type": "string", "description": "alias" },
+      "isPrimary": {
+        "type": "boolean",
+        "description": "isPrimary",
+        "nullable": true
+      },
+      "sortOrder": { "type": "integer", "description": "sortOrder" }
+    },
+    "required": ["alias", "sortOrder"]
+  },
+  "Identity_MembershipsDto": {
+    "type": "object",
+    "properties": {
+      "memberIdentityPageId": {
+        "type": "string",
+        "description": "FK -> catalog_identities.id. Person or organization; no artist profile required.",
+        "format": "uuid"
+      },
+      "joinedYear": {
+        "type": "integer",
+        "description": "Unknown is NULL. Year 1..9999; month requires year, day requires month; valid partial Gregorian date. Approved 2026-10-13.",
+        "nullable": true
+      },
+      "joinedMonth": {
+        "type": "integer",
+        "description": "Unknown is NULL. Month 1..12 requires year; day requires month and must be a valid Gregorian day. Never invent precision.",
+        "nullable": true
+      },
+      "joinedDay": {
+        "type": "integer",
+        "description": "Unknown is NULL. Month 1..12 requires year; day requires month and must be a valid Gregorian day. Never invent precision.",
+        "nullable": true
+      },
+      "leftYear": {
+        "type": "integer",
+        "description": "Unknown is NULL. Year 1..9999; month requires year, day requires month; valid partial Gregorian date. Approved 2026-10-13.",
+        "nullable": true
+      },
+      "leftMonth": {
+        "type": "integer",
+        "description": "Unknown is NULL. Month 1..12 requires year; day requires month and must be a valid Gregorian day. Never invent precision.",
+        "nullable": true
+      },
+      "leftDay": {
+        "type": "integer",
+        "description": "Unknown is NULL. Month 1..12 requires year; day requires month and must be a valid Gregorian day. Never invent precision.",
+        "nullable": true
+      },
+      "description": {
+        "type": "string",
+        "description": "Aquí es donde el usuario escribe la \"historia\" de ese artista dentro de la banda: \"Entró como baterista en 2024, pero tras la salida de X, pasó a ser la voz principal en el segundo álbum...\"",
+        "nullable": true
+      },
+      "status": {
+        "type": "string",
+        "description": "current | former | unknown; DEFAULT unknown. Known left_year requires former; current requires left_year/left_month/left_day NULL.",
+        "enum": ["current", "former", "unknown"]
+      },
+      "sourceText": {
+        "type": "string",
+        "description": "Referencia bibliográfica o transcripción del crédito; por ejemplo libreto, página y edición.",
+        "nullable": true
+      },
+      "sourceUrl": {
+        "type": "string",
+        "description": "sourceUrl",
+        "nullable": true,
+        "format": "uri"
+      }
+    },
+    "required": ["memberIdentityPageId", "status"]
+  },
+  "Identity_MembershipRolesDto": {
+    "type": "object",
+    "properties": {
+      "contributionRoleId": {
+        "type": "string",
+        "description": "contributionRoleId"
+      },
+      "position": { "type": "integer", "description": "position" },
+      "details": {
+        "type": "string",
+        "description": "details",
+        "nullable": true
+      },
+      "membershipKey": {
+        "type": "string",
+        "description": "Stable key of a membership component in this identity"
+      }
+    },
+    "required": ["contributionRoleId", "position", "membershipKey"]
+  },
+  "Identity_NationalitiesDto": {
+    "type": "object",
+    "properties": {
+      "countryId": {
+        "type": "string",
+        "description": "FK -> countries.id. ON DELETE RESTRICT."
+      }
+    },
+    "required": ["countryId"]
+  },
+  "Identity_OrganizationTypesDto": {
+    "type": "object",
+    "properties": {
+      "organizationTypeId": {
+        "type": "string",
+        "description": "FK -> organization_types.id. ON DELETE RESTRICT."
+      }
+    },
+    "required": ["organizationTypeId"]
+  },
+  "Identity_AffiliationsDto": {
+    "type": "object",
+    "properties": {
+      "organizationPageId": {
+        "type": "string",
+        "description": "FK -> organizations.catalog_identity_id. ON DELETE RESTRICT.",
+        "format": "uuid"
+      },
+      "relationshipType": {
+        "type": "string",
+        "description": "agency | label | management",
+        "enum": ["agency", "label", "management"]
+      },
+      "startedAt": {
+        "type": "string",
+        "description": "startedAt",
+        "nullable": true,
+        "format": "date"
+      },
+      "endedAt": {
+        "type": "string",
+        "description": "endedAt",
+        "nullable": true,
+        "format": "date"
+      },
+      "status": {
+        "type": "string",
+        "description": "current | former | unknown; DEFAULT unknown",
+        "enum": ["current", "former", "unknown"]
+      },
+      "description": {
+        "type": "string",
+        "description": "description",
+        "nullable": true
+      }
+    },
+    "required": ["organizationPageId", "relationshipType", "status"]
+  },
+  "Identity_PlatformLinksDto": {
+    "type": "object",
+    "properties": {
+      "platformId": { "type": "string", "description": "platformId" },
+      "url": { "type": "string", "description": "url", "format": "uri" }
+    },
+    "required": ["platformId", "url"]
+  },
+  "RecordingFieldsDto": {
+    "type": "object",
+    "properties": {
+      "title": { "type": "string", "description": "title" },
+      "desc": { "type": "string", "description": "desc", "nullable": true },
+      "isExplicit": { "type": "boolean", "description": "isExplicit" },
+      "isrc": { "type": "string", "description": "isrc", "nullable": true },
+      "recordingYear": {
+        "type": "integer",
+        "description": "Unknown is NULL. Year 1..9999; hierarchical partial Gregorian date. Approved 2026-10-12.",
+        "nullable": true
+      },
+      "recordingMonth": {
+        "type": "integer",
+        "description": "Unknown is NULL; month requires year, day requires month; validate Gregorian calendar.",
+        "nullable": true
+      },
+      "recordingDay": {
+        "type": "integer",
+        "description": "Unknown is NULL; month requires year, day requires month; validate Gregorian calendar.",
+        "nullable": true
+      }
+    },
+    "required": ["title", "isExplicit"]
+  },
+  "Recording_ContributionsDto": {
+    "type": "object",
+    "properties": {
+      "catalogIdentityPageId": {
+        "type": "string",
+        "description": "FK -> catalog_identities.id. ON DELETE RESTRICT.",
+        "format": "uuid"
+      },
+      "contributionRoleId": {
+        "type": "string",
+        "description": "contributionRoleId"
+      },
+      "creditedAs": {
+        "type": "string",
+        "description": "Literal name in the source; NULL displays catalog_identities.display_name. Does not create or merge an identity.",
+        "nullable": true
+      },
+      "position": {
+        "type": "integer",
+        "description": "DEFAULT 0; CHECK >= 0. Orden editorial, no importancia ni porcentaje."
+      },
+      "details": {
+        "type": "string",
+        "description": "Instrumentación, voces, función adicional o contexto según la fuente. Varios instrumentos del mismo rol se describen aquí.",
+        "nullable": true
+      },
+      "sourceText": {
+        "type": "string",
+        "description": "Referencia bibliográfica o transcripción del crédito; por ejemplo libreto, página y edición.",
+        "nullable": true
+      },
+      "sourceUrl": {
+        "type": "string",
+        "description": "sourceUrl",
+        "nullable": true,
+        "format": "uri"
+      }
+    },
+    "required": ["catalogIdentityPageId", "contributionRoleId", "position"]
+  },
+  "Recording_WorksDto": {
+    "type": "object",
+    "properties": {
+      "workPageId": {
+        "type": "string",
+        "description": "workPageId",
+        "format": "uuid"
+      },
+      "relationType": {
+        "type": "string",
+        "description": "performance | interpolation | sample; DEFAULT performance",
+        "enum": ["performance", "interpolation", "sample"]
+      },
+      "position": {
+        "type": "integer",
+        "description": "position",
+        "nullable": true
+      },
+      "details": {
+        "type": "string",
+        "description": "details",
+        "nullable": true
+      },
+      "sourceText": {
+        "type": "string",
+        "description": "Referencia bibliográfica o transcripción del crédito; por ejemplo libreto, página y edición.",
+        "nullable": true
+      },
+      "sourceUrl": {
+        "type": "string",
+        "description": "sourceUrl",
+        "nullable": true,
+        "format": "uri"
+      }
+    },
+    "required": ["workPageId", "relationType"]
+  },
+  "Recording_GenresDto": {
+    "type": "object",
+    "properties": {
+      "genreId": { "type": "string", "description": "genreId" },
+      "isPrimary": {
+        "type": "boolean",
+        "description": "1 primario por grabación"
+      }
+    },
+    "required": ["genreId", "isPrimary"]
+  },
+  "ReleaseFieldsDto": {
+    "type": "object",
+    "properties": {
+      "title": { "type": "string", "description": "title" },
+      "type": {
+        "type": "string",
+        "description": "album|ep|single|compilation",
+        "enum": ["album", "ep", "single", "compilation"]
+      },
+      "releaseYear": {
+        "type": "integer",
+        "description": "Unknown is NULL. Year 1..9999; hierarchical partial Gregorian date. Approved 2026-10-12.",
+        "nullable": true
+      },
+      "coverArtUrl": {
+        "type": "string",
+        "description": "NULL when the cover is unknown. If present, a valid HTTP(S) URL; never store a frontend placeholder. Approved 2026-10-13.",
+        "nullable": true,
+        "format": "uri"
+      },
+      "releaseMonth": {
+        "type": "integer",
+        "description": "Unknown is NULL; month requires year, day requires month; validate Gregorian calendar.",
+        "nullable": true
+      },
+      "releaseDay": {
+        "type": "integer",
+        "description": "Unknown is NULL; month requires year, day requires month; validate Gregorian calendar.",
+        "nullable": true
+      }
+    },
+    "required": ["title", "type"]
+  },
+  "Release_TracksDto": {
+    "type": "object",
+    "properties": {
+      "recordingPageId": {
+        "type": "string",
+        "description": "recordingPageId",
+        "format": "uuid"
+      },
+      "discNumber": { "type": "integer", "description": "discNumber" },
+      "trackNumber": { "type": "integer", "description": "trackNumber" },
+      "title": {
+        "type": "string",
+        "description": "Optional literal track title in this release edition. NULL uses the currently published and visible recording title for display only. If present, 1..512 characters and not whitespace-only. Never copy the fallback into the snapshot or create another recording. Approved 2026-10-13.",
+        "nullable": true
+      }
+    },
+    "required": ["recordingPageId", "discNumber", "trackNumber"]
+  },
+  "Release_ArtistCreditsDto": {
+    "type": "object",
+    "properties": {
+      "artistPageId": {
+        "type": "string",
+        "description": "artistPageId",
+        "format": "uuid"
+      },
+      "position": {
+        "type": "integer",
+        "description": "orden cuando hay múltiples artistas"
+      },
+      "creditedAs": {
+        "type": "string",
+        "description": "Literal presentation name in source; NULL uses catalog_identities.display_name through the artist profile.",
+        "nullable": true
+      }
+    },
+    "required": ["artistPageId", "position"]
+  },
+  "Release_TrackCreditsDto": {
+    "type": "object",
+    "properties": {
+      "artistPageId": {
+        "type": "string",
+        "description": "artistPageId",
+        "format": "uuid"
+      },
+      "rank": {
+        "type": "string",
+        "description": "main|featured|remixer",
+        "enum": ["main", "featured", "remixer"]
+      },
+      "position": { "type": "integer", "description": "position" },
+      "creditedAs": {
+        "type": "string",
+        "description": "Literal presentation name in source; NULL uses catalog_identities.display_name through the artist profile.",
+        "nullable": true
+      },
+      "trackKey": {
+        "type": "string",
+        "description": "Stable key of a track component in this release"
+      }
+    },
+    "required": ["artistPageId", "rank", "position", "trackKey"]
+  },
+  "Release_TrackLinksDto": {
+    "type": "object",
+    "properties": {
+      "platformId": { "type": "string", "description": "platformId" },
+      "url": { "type": "string", "description": "url", "format": "uri" },
+      "trackKey": {
+        "type": "string",
+        "description": "Stable key of a track component in this release"
+      }
+    },
+    "required": ["platformId", "url", "trackKey"]
+  },
+  "Release_ContributionsDto": {
+    "type": "object",
+    "properties": {
+      "catalogIdentityPageId": {
+        "type": "string",
+        "description": "FK -> catalog_identities.id. ON DELETE RESTRICT.",
+        "format": "uuid"
+      },
+      "contributionRoleId": {
+        "type": "string",
+        "description": "contributionRoleId"
+      },
+      "creditedAs": {
+        "type": "string",
+        "description": "Literal name in the source; NULL displays catalog_identities.display_name. Does not create or merge an identity.",
+        "nullable": true
+      },
+      "position": {
+        "type": "integer",
+        "description": "DEFAULT 0; CHECK >= 0. Orden editorial, no importancia ni porcentaje."
+      },
+      "details": {
+        "type": "string",
+        "description": "Instrumentación, voces, función adicional o contexto según la fuente. Varios instrumentos del mismo rol se describen aquí.",
+        "nullable": true
+      },
+      "sourceText": {
+        "type": "string",
+        "description": "Referencia bibliográfica o transcripción del crédito; por ejemplo libreto, página y edición.",
+        "nullable": true
+      },
+      "sourceUrl": {
+        "type": "string",
+        "description": "sourceUrl",
+        "nullable": true,
+        "format": "uri"
+      }
+    },
+    "required": ["catalogIdentityPageId", "contributionRoleId", "position"]
+  },
+  "WorkFieldsDto": {
+    "type": "object",
+    "properties": {
+      "title": { "type": "string", "description": "title" },
+      "slug": { "type": "string", "description": "slug" },
+      "description": {
+        "type": "string",
+        "description": "description",
+        "nullable": true
+      },
+      "iswc": {
+        "type": "string",
+        "description": "Forma canónica T + 10 dígitos, sin puntuación. Validar formato y dígito de control al implementar. NULL cuando no se conoce.",
+        "nullable": true
+      }
+    },
+    "required": ["title", "slug"]
+  },
+  "Work_ContributionsDto": {
+    "type": "object",
+    "properties": {
+      "catalogIdentityPageId": {
+        "type": "string",
+        "description": "FK -> catalog_identities.id. ON DELETE RESTRICT.",
+        "format": "uuid"
+      },
+      "contributionRoleId": {
+        "type": "string",
+        "description": "contributionRoleId"
+      },
+      "creditedAs": {
+        "type": "string",
+        "description": "Literal name in the source; NULL displays catalog_identities.display_name. Does not create or merge an identity.",
+        "nullable": true
+      },
+      "position": {
+        "type": "integer",
+        "description": "DEFAULT 0; CHECK >= 0. Orden editorial, no importancia ni porcentaje."
+      },
+      "details": {
+        "type": "string",
+        "description": "Instrumentación, voces, función adicional o contexto según la fuente. Varios instrumentos del mismo rol se describen aquí.",
+        "nullable": true
+      },
+      "sourceText": {
+        "type": "string",
+        "description": "Referencia bibliográfica o transcripción del crédito; por ejemplo libreto, página y edición.",
+        "nullable": true
+      },
+      "sourceUrl": {
+        "type": "string",
+        "description": "sourceUrl",
+        "nullable": true,
+        "format": "uri"
+      }
+    },
+    "required": ["catalogIdentityPageId", "contributionRoleId", "position"]
+  },
+  "EventFieldsDto": {
+    "type": "object",
+    "properties": {
+      "title": { "type": "string", "description": "title" },
+      "type": {
+        "type": "string",
+        "description": "concert; DEFAULT concert. Festivals, fan meetings and virtual events are out of scope.",
+        "enum": ["concert"]
+      },
+      "description": {
+        "type": "string",
+        "description": "description",
+        "nullable": true
+      },
+      "imageUrl": {
+        "type": "string",
+        "description": "imageUrl",
+        "nullable": true,
+        "format": "uri"
+      },
+      "tourPageId": {
+        "type": "string",
+        "description": "FK -> tours.id. ON DELETE RESTRICT.",
+        "nullable": true,
+        "format": "uuid"
+      },
+      "startYear": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "startMonth": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "startDay": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "startTime": {
+        "type": "string",
+        "description": "startTime",
+        "nullable": true
+      },
+      "timezone": {
+        "type": "string",
+        "description": "IANA zone, e.g. America/Lima. No country-based inference.",
+        "nullable": true
+      },
+      "countryId": {
+        "type": "string",
+        "description": "FK -> countries.id. ON DELETE RESTRICT.",
+        "nullable": true
+      },
+      "city": { "type": "string", "description": "city", "nullable": true },
+      "venueName": {
+        "type": "string",
+        "description": "venueName",
+        "nullable": true
+      },
+      "status": {
+        "type": "string",
+        "description": "announced | scheduled | postponed | cancelled | performed. scheduled requires full date, but time/venue may be unknown. Past date does not prove performed.",
+        "enum": [
+          "announced",
+          "scheduled",
+          "postponed",
+          "cancelled",
+          "performed"
+        ]
+      }
+    },
+    "required": ["title", "type", "status"]
+  },
+  "Event_ArtistsDto": {
+    "type": "object",
+    "properties": {
+      "artistPageId": {
+        "type": "string",
+        "description": "FK -> artists.id. ON DELETE RESTRICT.",
+        "format": "uuid"
+      },
+      "role": {
+        "type": "string",
+        "description": "main | support | guest",
+        "enum": ["main", "support", "guest"]
+      },
+      "position": {
+        "type": "integer",
+        "description": "DEFAULT 0; CHECK >= 0; editorial order."
+      },
+      "creditedAs": {
+        "type": "string",
+        "description": "Literal announced name. NULL uses catalog_identities.display_name through artists.catalog_identity_id; never creates another identity.",
+        "nullable": true
+      }
+    },
+    "required": ["artistPageId", "role", "position"]
+  },
+  "Event_OrganizersDto": {
+    "type": "object",
+    "properties": {
+      "catalogIdentityPageId": {
+        "type": "string",
+        "description": "FK -> catalog_identities.id. ON DELETE RESTRICT.",
+        "format": "uuid"
+      },
+      "details": {
+        "type": "string",
+        "description": "details",
+        "nullable": true
+      },
+      "position": { "type": "integer", "description": "DEFAULT 0; CHECK >= 0" }
+    },
+    "required": ["catalogIdentityPageId", "position"]
+  },
+  "Event_LinksDto": {
+    "type": "object",
+    "properties": {
+      "label": { "type": "string", "description": "label" },
+      "url": { "type": "string", "description": "url", "format": "uri" },
+      "purpose": {
+        "type": "string",
+        "description": "official | tickets",
+        "enum": ["official", "tickets"]
+      },
+      "position": { "type": "integer", "description": "DEFAULT 0; CHECK >= 0" }
+    },
+    "required": ["label", "url", "purpose", "position"]
+  },
+  "TourFieldsDto": {
+    "type": "object",
+    "properties": {
+      "title": { "type": "string", "description": "title" },
+      "description": {
+        "type": "string",
+        "description": "description",
+        "nullable": true
+      },
+      "imageUrl": {
+        "type": "string",
+        "description": "imageUrl",
+        "nullable": true,
+        "format": "uri"
+      },
+      "startYear": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "startMonth": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "startDay": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "endYear": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "endMonth": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "endDay": {
+        "type": "integer",
+        "description": "Unknown components are NULL. month requires year; day requires month; validate Gregorian calendar. Never use placeholder month/day.",
+        "nullable": true
+      },
+      "status": {
+        "type": "string",
+        "description": "announced | scheduled | in_progress | postponed | cancelled | completed. Editorial publication status is separate in wiki_pages.",
+        "enum": [
+          "announced",
+          "scheduled",
+          "in_progress",
+          "postponed",
+          "cancelled",
+          "completed"
+        ]
+      }
+    },
+    "required": ["title", "status"]
+  },
+  "Tour_ArtistsDto": {
+    "type": "object",
+    "properties": {
+      "artistPageId": {
+        "type": "string",
+        "description": "FK -> artists.id. ON DELETE RESTRICT.",
+        "format": "uuid"
+      },
+      "role": {
+        "type": "string",
+        "description": "main | support | guest",
+        "enum": ["main", "support", "guest"]
+      },
+      "position": {
+        "type": "integer",
+        "description": "DEFAULT 0; CHECK >= 0; editorial order."
+      },
+      "creditedAs": {
+        "type": "string",
+        "description": "Literal announced name. NULL uses catalog_identities.display_name through artists.catalog_identity_id; never creates another identity.",
+        "nullable": true
+      }
+    },
+    "required": ["artistPageId", "role", "position"]
+  },
+  "Tour_OrganizersDto": {
+    "type": "object",
+    "properties": {
+      "catalogIdentityPageId": {
+        "type": "string",
+        "description": "FK -> catalog_identities.id. ON DELETE RESTRICT.",
+        "format": "uuid"
+      },
+      "details": {
+        "type": "string",
+        "description": "details",
+        "nullable": true
+      },
+      "position": { "type": "integer", "description": "DEFAULT 0; CHECK >= 0" }
+    },
+    "required": ["catalogIdentityPageId", "position"]
+  },
+  "Tour_LinksDto": {
+    "type": "object",
+    "properties": {
+      "label": { "type": "string", "description": "label" },
+      "url": { "type": "string", "description": "url", "format": "uri" },
+      "purpose": {
+        "type": "string",
+        "description": "official | tickets",
+        "enum": ["official", "tickets"]
+      },
+      "countryId": {
+        "type": "string",
+        "description": "FK -> countries.id. ON DELETE RESTRICT.",
+        "nullable": true
+      },
+      "position": { "type": "integer", "description": "DEFAULT 0; CHECK >= 0" }
+    },
+    "required": ["label", "url", "purpose", "position"]
+  }
+}
